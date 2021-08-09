@@ -40,8 +40,40 @@ namespace api.Controllers
 			string input = System.IO.File.ReadAllText(@".\dailySalesQuery.xml");
       // string input = template.Replace("STARTDATE", sDate).Replace("ENDDATE", eDate);
 			// string input = System.IO.File.ReadAllText(@"salesQuery.xml");
+			//
+			// generate xml query
+			//string info = Request.QueryString.Value;
+			string info = HttpContext.Request.Path;
+			if (Request.Query.ContainsKey("todate")) {
+				info = Request.Query["todate"];
+			}	
+			Console.WriteLine (Request.ToString());
 
-			Console.WriteLine ("XML: {0}", input);
+			XmlDocument inputXMLDoc = new XmlDocument();
+			inputXMLDoc.AppendChild(inputXMLDoc.CreateXmlDeclaration("1.0", "utf-8", null));
+			inputXMLDoc.AppendChild(inputXMLDoc.CreateProcessingInstruction("qbxml", "version=\"13.0\""));
+			XmlElement qbXML = inputXMLDoc.CreateElement("QBXML");
+			inputXMLDoc.AppendChild(qbXML);
+
+			XmlElement qbXMLMsgsRq = inputXMLDoc.CreateElement("QBXMLMsgsRq");
+			qbXML.AppendChild(qbXMLMsgsRq);
+			qbXMLMsgsRq.SetAttribute("onError", "stopOnError");
+
+			XmlElement salesReceiptQueryRq = inputXMLDoc.CreateElement("SalesReceiptQueryRq");
+			qbXMLMsgsRq.AppendChild(salesReceiptQueryRq);
+			salesReceiptQueryRq.SetAttribute("metaData", "MetaDataAndResponseData");
+
+			// TODO: switch modifiedData or TxnDate
+			XmlElement txnDateRangeFilter = inputXMLDoc.CreateElement("TxnDateRangeFilter");
+			salesReceiptQueryRq.AppendChild(txnDateRangeFilter);
+			txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("FromTxnDate")).InnerText=Request.Query["fromdate"];
+			txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("ToTxnDate")).InnerText=Request.Query["todate"];
+
+			salesReceiptQueryRq.AppendChild(inputXMLDoc.CreateElement("IncludeLineItems")).InnerText="true";
+
+			string generatedXML = inputXMLDoc.OuterXml;
+
+			Console.WriteLine ("XML: {0}", generatedXML);
 
 			//step3: do the qbXMLRP request
 
@@ -60,10 +92,14 @@ namespace api.Controllers
 				Console.Write ("check2");
 				rp.OpenConnection("", "IDN CustomerAdd C# sample" );
 				Console.WriteLine ("check3 {0}", rp);
+				//string info = Request.QueryString.ToString();
+				//ICollection<string> queryKeys = Request.Query.Keys;
+				//string info = Request.Query["date"];
 				ticket = rp.BeginSession("", QBFileMode.qbFileOpenDoNotCare );
 				//ticket = rp.BeginSession("C:\\Users\\Public\\Documents\\Intuit\\QuickBooks\\Company Files\\Hannah's Restaurant_3.QBW", QBFileMode.qbFileOpenDoNotCare );
 				Console.WriteLine ("check1 {0}", rp);
 
+				//response = rp.ProcessRequest(ticket, generatedXML);
 				response = rp.ProcessRequest(ticket, input);
 
 					
