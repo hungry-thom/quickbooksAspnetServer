@@ -43,11 +43,12 @@ namespace api.Controllers
 			//
 			// generate xml query
 			//string info = Request.QueryString.Value;
-			string info = HttpContext.Request.Path;
-			if (Request.Query.ContainsKey("todate")) {
-				info = Request.Query["todate"];
+			string info = "GoodQuery";
+			if (!Request.Query.ContainsKey("todate") || !Request.Query.ContainsKey("fromdate")) {
+				info = "BadQuery";
+				return info;
 			}	
-			Console.WriteLine (Request.ToString());
+			Console.WriteLine (info);
 
 			XmlDocument inputXMLDoc = new XmlDocument();
 			inputXMLDoc.AppendChild(inputXMLDoc.CreateXmlDeclaration("1.0", "utf-8", null));
@@ -99,8 +100,8 @@ namespace api.Controllers
 				//ticket = rp.BeginSession("C:\\Users\\Public\\Documents\\Intuit\\QuickBooks\\Company Files\\Hannah's Restaurant_3.QBW", QBFileMode.qbFileOpenDoNotCare );
 				Console.WriteLine ("check1 {0}", rp);
 
-				//response = rp.ProcessRequest(ticket, generatedXML);
-				response = rp.ProcessRequest(ticket, input);
+				response = rp.ProcessRequest(ticket, generatedXML);
+				//response = rp.ProcessRequest(ticket, input);
 
 					
 
@@ -147,6 +148,7 @@ namespace api.Controllers
 
 			outputXMLDoc.LoadXml(response);
 			string json = JsonConvert.SerializeXmlNode(outputXMLDoc);
+			//string json = "sucess";
 			// JObject json2 = JObject.Parse(json)
       // Console.WriteLine("response {0}", json2.SelectToken("QBXML.QBXMLMsgsRs.SalesReceiptQueryRs.SalesReceiptRet")); // .QBXML.SalesReceiptRet
       System.IO.File.WriteAllText(@".\salesResponse.json", json);
