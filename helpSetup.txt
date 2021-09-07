@@ -1,0 +1,3 @@
+need to run ngrok and update deliverylist page (2 instances) with new address
+run buildText
+

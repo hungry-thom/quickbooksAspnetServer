@@ -158,7 +158,7 @@ namespace api.Controllers
 			//string json = "sucess";
 			// JObject json2 = JObject.Parse(json)
       // Console.WriteLine("response {0}", json2.SelectToken("QBXML.QBXMLMsgsRs.SalesReceiptQueryRs.SalesReceiptRet")); // .QBXML.SalesReceiptRet
-      System.IO.File.WriteAllText(@".\salesResponse.json", json);
+      //System.IO.File.WriteAllText(@".\salesResponse.json", json);
       return json;
       //System.IO.File.WriteAllText(@".\runHistory.ini", eDate);
       ////////////////////////////////////
