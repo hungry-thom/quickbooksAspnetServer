@@ -1,0 +1,8 @@
+for errors with nuget packages
+1. clear cache: 
+	$ dotnet nuget locals all --clear
+2. reset config: 
+	$ rm C:\Users\<username>\AppData\Roaming\Nuget\NuGet.config
+	$ dotnet restore
+3. ensure nuget source. In default nuget.config:
+	<add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
