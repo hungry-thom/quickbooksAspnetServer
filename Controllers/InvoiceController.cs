@@ -63,8 +63,13 @@ namespace api.Controllers
 				invoiceQueryRq.AppendChild(txnDateRangeFilter);
 				txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("FromTxnDate")).InnerText=Request.Query["fromdate"];
 				txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("ToTxnDate")).InnerText=Request.Query["todate"];
+			} else if (Request.Query.ContainsKey("modTo") && Request.Query.ContainsKey("modFrom")) {
+				// TODO: switch modifiedData or TxnDate
+				XmlElement modDateRangeFilter = inputXMLDoc.CreateElement("ModifiedDateRangeFilter");
+				invoiceQueryRq.AppendChild(modDateRangeFilter);
+				modDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("FromModifiedDate")).InnerText=Request.Query["modFrom"];
+				modDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("ToModifiedDate")).InnerText=Request.Query["modTo"];
 			}
-
 			
 			// TODO: switch entitiy for listid and FullName
 			if (Request.Query.ContainsKey("entity")) {
