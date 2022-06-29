@@ -17,16 +17,16 @@ namespace api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class InvoiceController : ControllerBase
+    public class ItemController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        private readonly ILogger<InvoiceController> _logger;
+        private readonly ILogger<ItemController> _logger;
 
-        public InvoiceController(ILogger<InvoiceController> logger)
+        public ItemController(ILogger<ItemController> logger)
         {
             _logger = logger;
         }
@@ -53,37 +53,21 @@ namespace api.Controllers
 			qbXML.AppendChild(qbXMLMsgsRq);
 			qbXMLMsgsRq.SetAttribute("onError", "stopOnError");
 
-			XmlElement invoiceQueryRq = inputXMLDoc.CreateElement("InvoiceQueryRq");
-			qbXMLMsgsRq.AppendChild(invoiceQueryRq);
-			invoiceQueryRq.SetAttribute("metaData", "MetaDataAndResponseData");
+			XmlElement itemQueryRq = inputXMLDoc.CreateElement("ItemOtherChargeQueryRq");
+			qbXMLMsgsRq.AppendChild(itemQueryRq);
+			itemQueryRq.SetAttribute("metaData", "MetaDataAndResponseData");
+			itemQueryRq.AppendChild(inputXMLDoc.CreateElement("ActiveStatus")).InnerText="ActiveOnly";
 
-			if (Request.Query.ContainsKey("todate") && Request.Query.ContainsKey("fromdate")) {
-				// TODO: switch modifiedData or TxnDate
-				XmlElement txnDateRangeFilter = inputXMLDoc.CreateElement("TxnDateRangeFilter");
-				invoiceQueryRq.AppendChild(txnDateRangeFilter);
-				txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("FromTxnDate")).InnerText=Request.Query["fromdate"];
-				txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("ToTxnDate")).InnerText=Request.Query["todate"];
-			} else if (Request.Query.ContainsKey("modTo") && Request.Query.ContainsKey("modFrom")) {
-				// TODO: switch modifiedData or TxnDate
-				XmlElement modDateRangeFilter = inputXMLDoc.CreateElement("ModifiedDateRangeFilter");
-				invoiceQueryRq.AppendChild(modDateRangeFilter);
-				modDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("FromModifiedDate")).InnerText=Request.Query["modFrom"];
-				modDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("ToModifiedDate")).InnerText=Request.Query["modTo"];
-			}
-			
+			/*
 			// TODO: switch entitiy for listid and FullName
-			if (Request.Query.ContainsKey("entity")) {
-				XmlElement entityFilter = inputXMLDoc.CreateElement("EntityFilter");
-				invoiceQueryRq.AppendChild(entityFilter);
-				entityFilter.AppendChild(inputXMLDoc.CreateElement("ListID")).InnerText=Request.Query["entity"];
+			if (Request.Query.ContainsKey("name")) {
+				XmlElement nameFilter = inputXMLDoc.CreateElement("NameFilter");
+				itemQueryRq.AppendChild(nameFilter);
+				// MatchCriterion may have one of the following values: StartsWith, Contains, EndsWith
+				nameFilter.AppendChild(inputXMLDoc.CreateElement("MatchCriterion")).InnerText="Contains";
+				nameFilter.AppendChild(inputXMLDoc.CreateElement("Name")).InnerText=Request.Query["name"];
 			}
-
-			// TODO: switch PaidStatus [ All, PaidOnly, NotPaidOnly]
-			invoiceQueryRq.AppendChild(inputXMLDoc.CreateElement("PaidStatus")).InnerText="NotPaidOnly";
-			invoiceQueryRq.AppendChild(inputXMLDoc.CreateElement("IncludeLineItems")).InnerText="true";
-
-			// Include Linked txns?
-			// invoiceQueryRq.AppendChild(inputXMLDoc.CreateElement("IncludeLinkedTxns")).InnerText="true";
+			*/
 			string generatedXML = inputXMLDoc.OuterXml;
 
 			Console.WriteLine ("XML: {0}", generatedXML);
@@ -178,5 +162,116 @@ namespace api.Controllers
             .ToArray();
 	    */
         }
+        [HttpPost]
+        //public IEnumerable<WeatherForecast> Get()
+        //public  Task<string> Post()
+        public  string Post()
+        {
+		XmlDocument inputXMLDoc = new XmlDocument();
+		inputXMLDoc.AppendChild(inputXMLDoc.CreateXmlDeclaration("1.0", "utf-8", null));
+		inputXMLDoc.AppendChild(inputXMLDoc.CreateProcessingInstruction("qbxml", "version=\"13.0\""));
+		XmlElement qbXML = inputXMLDoc.CreateElement("QBXML");
+		inputXMLDoc.AppendChild(qbXML);
+
+		XmlElement qbXMLMsgsRq = inputXMLDoc.CreateElement("QBXMLMsgsRq");
+		qbXML.AppendChild(qbXMLMsgsRq);
+		qbXMLMsgsRq.SetAttribute("onError", "stopOnError");
+
+		XmlElement itemModRq = inputXMLDoc.CreateElement("ItemOtherChargeModRq");
+		qbXMLMsgsRq.AppendChild(itemModRq);
+
+		XmlElement itemMod = inputXMLDoc.CreateElement("ItemOtherChargeMod");
+		itemModRq.AppendChild(itemMod);
+
+		itemMod.AppendChild(inputXMLDoc.CreateElement("ListID")).InnerText=Request.Query["id"];
+		itemMod.AppendChild(inputXMLDoc.CreateElement("EditSequence")).InnerText=Request.Query["eseq"];
+
+		XmlElement saleMod = inputXMLDoc.CreateElement("SalesOrPurchaseMod");
+		itemMod.AppendChild(saleMod);
+
+		saleMod.AppendChild(inputXMLDoc.CreateElement("Price")).InnerText=Request.Query["price"];
+
+		string generatedXML = inputXMLDoc.OuterXml;
+		Console.WriteLine ("XML: {0}", generatedXML);
+
+			RequestProcessor2 rp = null; 
+
+			string ticket = null;
+
+			string response = null;
+
+			try 
+
+			{
+
+				Console.Write ("check1");
+				rp = new RequestProcessor2 ();
+				Console.Write ("check2");
+				rp.OpenConnection("", "IDN CustomerAdd C# sample" );
+				Console.WriteLine ("check3 {0}", rp);
+				//string info = Request.QueryString.ToString();
+				//ICollection<string> queryKeys = Request.Query.Keys;
+				//string info = Request.Query["date"];
+				ticket = rp.BeginSession("", QBFileMode.qbFileOpenDoNotCare );
+				//ticket = rp.BeginSession("C:\\Users\\Public\\Documents\\Intuit\\QuickBooks\\Company Files\\Hannah's Restaurant_3.QBW", QBFileMode.qbFileOpenDoNotCare );
+				Console.WriteLine ("check1 {0}", rp);
+
+				response = rp.ProcessRequest(ticket, generatedXML);
+				//response = rp.ProcessRequest(ticket, input);
+
+					
+
+			}
+
+			catch( System.Runtime.InteropServices.COMException ex )
+			//catch( )
+
+			{
+
+				Console.WriteLine ( "COM Error Description = " +  ex.Message + "COM error" );
+
+				//return;
+
+			}
+
+			finally
+
+			{
+
+				if( ticket != null )
+
+				{
+
+					rp.EndSession(ticket);
+
+				}
+
+				if( rp != null )
+
+				{
+
+					rp.CloseConnection();
+
+				}
+
+			};
+
+
+
+			//step4: parse the XML response and export
+
+			XmlDocument outputXMLDoc = new XmlDocument();
+
+			outputXMLDoc.LoadXml(response);
+			string json = JsonConvert.SerializeXmlNode(outputXMLDoc);
+			//string json = "sucess";
+			// JObject json2 = JObject.Parse(json)
+      // Console.WriteLine("response {0}", json2.SelectToken("QBXML.QBXMLMsgsRs.SalesReceiptQueryRs.SalesReceiptRet")); // .QBXML.SalesReceiptRet
+      //System.IO.File.WriteAllText(@".\salesResponse.json", json);
+      return json;
+
+		
+
+	}
     }
 }
