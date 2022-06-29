@@ -17,16 +17,16 @@ namespace api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class InvoiceController : ControllerBase
+    public class ReceivePaymentController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        private readonly ILogger<InvoiceController> _logger;
+        private readonly ILogger<ReceivePaymentController> _logger;
 
-        public InvoiceController(ILogger<InvoiceController> logger)
+        public ReceivePaymentController(ILogger<ReceivePaymentController> logger)
         {
             _logger = logger;
         }
@@ -53,14 +53,14 @@ namespace api.Controllers
 			qbXML.AppendChild(qbXMLMsgsRq);
 			qbXMLMsgsRq.SetAttribute("onError", "stopOnError");
 
-			XmlElement invoiceQueryRq = inputXMLDoc.CreateElement("InvoiceQueryRq");
-			qbXMLMsgsRq.AppendChild(invoiceQueryRq);
-			invoiceQueryRq.SetAttribute("metaData", "MetaDataAndResponseData");
+			XmlElement receivePaymentQueryRq = inputXMLDoc.CreateElement("ReceivePaymentQueryRq");
+			qbXMLMsgsRq.AppendChild(receivePaymentQueryRq);
+			receivePaymentQueryRq.SetAttribute("metaData", "MetaDataAndResponseData");
 
 			if (Request.Query.ContainsKey("todate") && Request.Query.ContainsKey("fromdate")) {
 				// TODO: switch modifiedData or TxnDate
 				XmlElement txnDateRangeFilter = inputXMLDoc.CreateElement("TxnDateRangeFilter");
-				invoiceQueryRq.AppendChild(txnDateRangeFilter);
+				receivePaymentQueryRq.AppendChild(txnDateRangeFilter);
 				txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("FromTxnDate")).InnerText=Request.Query["fromdate"];
 				txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("ToTxnDate")).InnerText=Request.Query["todate"];
 			}
@@ -69,16 +69,14 @@ namespace api.Controllers
 			// TODO: switch entitiy for listid and FullName
 			if (Request.Query.ContainsKey("entity")) {
 				XmlElement entityFilter = inputXMLDoc.CreateElement("EntityFilter");
-				invoiceQueryRq.AppendChild(entityFilter);
+				receivePaymentQueryRq.AppendChild(entityFilter);
 				entityFilter.AppendChild(inputXMLDoc.CreateElement("ListID")).InnerText=Request.Query["entity"];
 			}
 
-			// TODO: switch PaidStatus [ All, PaidOnly, NotPaidOnly]
-			invoiceQueryRq.AppendChild(inputXMLDoc.CreateElement("PaidStatus")).InnerText="All";
-			invoiceQueryRq.AppendChild(inputXMLDoc.CreateElement("IncludeLineItems")).InnerText="true";
+			receivePaymentQueryRq.AppendChild(inputXMLDoc.CreateElement("IncludeLineItems")).InnerText="true";
 
 			// Include Linked txns?
-			// invoiceQueryRq.AppendChild(inputXMLDoc.CreateElement("IncludeLinkedTxns")).InnerText="true";
+			// receivePaymentQueryRq.AppendChild(inputXMLDoc.CreateElement("IncludeLinkedTxns")).InnerText="true";
 			string generatedXML = inputXMLDoc.OuterXml;
 
 			Console.WriteLine ("XML: {0}", generatedXML);
