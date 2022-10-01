@@ -79,7 +79,11 @@ namespace api.Controllers
 			}
 
 			// TODO: switch PaidStatus [ All, PaidOnly, NotPaidOnly]
-			invoiceQueryRq.AppendChild(inputXMLDoc.CreateElement("PaidStatus")).InnerText="All";
+			if (Request.Query.ContainsKey("status")) {
+				invoiceQueryRq.AppendChild(inputXMLDoc.CreateElement("PaidStatus")).InnerText="NotPaidOnly";
+			} else {
+				invoiceQueryRq.AppendChild(inputXMLDoc.CreateElement("PaidStatus")).InnerText="All";
+			}
 			invoiceQueryRq.AppendChild(inputXMLDoc.CreateElement("IncludeLineItems")).InnerText="true";
 
 			// Include Linked txns?
