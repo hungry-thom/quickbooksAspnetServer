@@ -58,11 +58,15 @@ namespace api.Controllers
 			receivePaymentQueryRq.SetAttribute("metaData", "MetaDataAndResponseData");
 
 			if (Request.Query.ContainsKey("todate") && Request.Query.ContainsKey("fromdate")) {
-				// TODO: switch modifiedData or TxnDate
 				XmlElement txnDateRangeFilter = inputXMLDoc.CreateElement("TxnDateRangeFilter");
 				receivePaymentQueryRq.AppendChild(txnDateRangeFilter);
 				txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("FromTxnDate")).InnerText=Request.Query["fromdate"];
 				txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("ToTxnDate")).InnerText=Request.Query["todate"];
+			} else if (Request.Query.ContainsKey("modTo") && Request.Query.ContainsKey("modFrom")) {
+				XmlElement modDateRangeFilter = inputXMLDoc.CreateElement("ModifiedDateRangeFilter");
+				receivePaymentQueryRq.AppendChild(modDateRangeFilter);
+				modDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("FromModifiedDate")).InnerText=Request.Query["modFrom"];
+				modDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("ToModifiedDate")).InnerText=Request.Query["modTo"];
 			}
 
 			

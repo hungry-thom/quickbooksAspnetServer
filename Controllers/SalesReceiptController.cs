@@ -43,12 +43,6 @@ namespace api.Controllers
 			//
 			// generate xml query
 			//string info = Request.QueryString.Value;
-			string info = "GoodQuery";
-			if (!Request.Query.ContainsKey("todate") || !Request.Query.ContainsKey("fromdate")) {
-				info = "BadQuery";
-				return info;
-			}	
-			Console.WriteLine (info);
 
 			XmlDocument inputXMLDoc = new XmlDocument();
 			inputXMLDoc.AppendChild(inputXMLDoc.CreateXmlDeclaration("1.0", "utf-8", null));
@@ -64,11 +58,26 @@ namespace api.Controllers
 			qbXMLMsgsRq.AppendChild(salesReceiptQueryRq);
 			salesReceiptQueryRq.SetAttribute("metaData", "MetaDataAndResponseData");
 
+			/* 
 			// TODO: switch modifiedData or TxnDate
 			XmlElement txnDateRangeFilter = inputXMLDoc.CreateElement("TxnDateRangeFilter");
 			salesReceiptQueryRq.AppendChild(txnDateRangeFilter);
 			txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("FromTxnDate")).InnerText=Request.Query["fromdate"];
 			txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("ToTxnDate")).InnerText=Request.Query["todate"];
+			*/
+
+
+			if (Request.Query.ContainsKey("todate") && Request.Query.ContainsKey("fromdate")) {
+				XmlElement txnDateRangeFilter = inputXMLDoc.CreateElement("TxnDateRangeFilter");
+				salesReceiptQueryRq.AppendChild(txnDateRangeFilter);
+				txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("FromTxnDate")).InnerText=Request.Query["fromdate"];
+				txnDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("ToTxnDate")).InnerText=Request.Query["todate"];
+			} else if (Request.Query.ContainsKey("modTo") && Request.Query.ContainsKey("modFrom")) {
+				XmlElement modDateRangeFilter = inputXMLDoc.CreateElement("ModifiedDateRangeFilter");
+				salesReceiptQueryRq.AppendChild(modDateRangeFilter);
+				modDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("FromModifiedDate")).InnerText=Request.Query["modFrom"];
+				modDateRangeFilter.AppendChild(inputXMLDoc.CreateElement("ToModifiedDate")).InnerText=Request.Query["modTo"];
+			}
 
 			salesReceiptQueryRq.AppendChild(inputXMLDoc.CreateElement("IncludeLineItems")).InnerText="true";
 
