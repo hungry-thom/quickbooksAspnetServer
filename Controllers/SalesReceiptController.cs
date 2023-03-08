@@ -175,5 +175,71 @@ namespace api.Controllers
             .ToArray();
 	    */
         }
+	public  string Post()
+	{
+		XmlDocument inputXMLDoc = new XmlDocument();
+		inputXMLDoc.AppendChild(inputXMLDoc.CreateXmlDeclaration("1.0", "utf-$ ", null));
+		inputXMLDoc.AppendChild(inputXMLDoc.CreateProcessingInstruction("qbxm$ ", "version=\"13.0\""));
+		XmlElement qbXML = inputXMLDoc.CreateElement("QBXML");
+		inputXMLDoc.AppendChild(qbXML);
+		XmlElement qbXMLMsgsRq = inputXMLDoc.CreateElement("QBXMLMsgsRq");
+		qbXML.AppendChild(qbXMLMsgsRq);
+		qbXMLMsgsRq.SetAttribute("onError", "stopOnError");
+		XmlElement salesRecModRq = inputXMLDoc.CreateElement("SalesReceiptModR q");
+		qbXMLMsgsRq.AppendChild(salesRecModRq);
+		XmlElement salesRecMod = inputXMLDoc.CreateElement("SalesReceiptMod");
+		salesRecModRq.AppendChild(salesRecMod);
+		salesRecMod.AppendChild(inputXMLDoc.CreateElement("TxnID")).InnerText= Request.Query["id"];
+		salesRecMod.AppendChild(inputXMLDoc.CreateElement("EditSequence")).Inn erText=Request.Query["eseq"];
+		salesRecMod.AppendChild(inputXMLDoc.CreateElement("TxnDate")).InnerTex t=Request.Query["date"];
+		string generatedXML = inputXMLDoc.OuterXml;
+		Console.WriteLine ("XML: {0}", generatedXML);
+		RequestProcessor2 rp = null;
+		string ticket = null;
+		string response = null;
+		try
+		{
+			Console.Write ("check1");
+			rp = new RequestProcessor2 ();
+			Console.Write ("check2");
+			rp.OpenConnection("", "IDN CustomerAdd C# sample" );
+			Console.WriteLine ("check3 {0}", rp);
+			//string info = Request.QueryString.ToString();
+			//ICollection<string> queryKeys = Request.Query.Keys;
+			//string info = Request.Query["date"];
+			ticket = rp.BeginSession("", QBFileMode.qbFileOpenDoNotCare );
+			//ticket = rp.BeginSession("C:\\Users\\Public\\Documen ts\\Intuit\\QuickBooks\\Company Files\\Hannah's Restaurant_3.QBW", QBFileMode.qbFileOp enDoNotCare );
+			Console.WriteLine ("check1 {0}", rp);
+			response = rp.ProcessRequest(ticket, generatedXML);
+			//response = rp.ProcessRequest(ticket, input);
+			}
+		catch( System.Runtime.InteropServices.COMException ex )
+		{
+			Console.WriteLine ( "COM Error Description = " +  ex.M essage + "COM error" );
+			//return;
+		}
+		finally
+		{
+			if( ticket != null )
+			{
+				rp.EndSession(ticket);
+			}
+			if( rp != null )
+			{
+				rp.CloseConnection();
+			}
+		};
+		                         
+		//step4: parse the XML response and export
+		XmlDocument outputXMLDoc = new XmlDocument();
+		outputXMLDoc.LoadXml(response);
+		string json = JsonConvert.SerializeXmlNode(outputXMLDoc);
+		//string json = "sucess";
+		// JObject json2 = JObject.Parse(json)
+		// Console.WriteLine("response {0}", json2.SelectToken("QBXML.QBXMLMsgsRs.SalesR eceiptQueryRs.SalesReceiptRet")); // .QBXML.SalesReceiptRet
+		//System.IO.File.WriteAllText(@".\salesResponse.json", json);
+		return json;                 } 
+
+
     }
 }
