@@ -190,8 +190,8 @@ namespace api.Controllers
 		XmlElement salesRecMod = inputXMLDoc.CreateElement("SalesReceiptMod");
 		salesRecModRq.AppendChild(salesRecMod);
 		salesRecMod.AppendChild(inputXMLDoc.CreateElement("TxnID")).InnerText= Request.Query["id"];
-		salesRecMod.AppendChild(inputXMLDoc.CreateElement("EditSequence")).Inn erText=Request.Query["eseq"];
-		salesRecMod.AppendChild(inputXMLDoc.CreateElement("TxnDate")).InnerTex t=Request.Query["date"];
+		salesRecMod.AppendChild(inputXMLDoc.CreateElement("EditSequence")).InnerText=Request.Query["eseq"];
+		salesRecMod.AppendChild(inputXMLDoc.CreateElement("TxnDate")).InnerText=Request.Query["date"];
 		string generatedXML = inputXMLDoc.OuterXml;
 		Console.WriteLine ("XML: {0}", generatedXML);
 		RequestProcessor2 rp = null;
@@ -215,7 +215,7 @@ namespace api.Controllers
 			}
 		catch( System.Runtime.InteropServices.COMException ex )
 		{
-			Console.WriteLine ( "COM Error Description = " +  ex.M essage + "COM error" );
+			Console.WriteLine ( "COM Error Description = " +  ex.Message + "COM error" );
 			//return;
 		}
 		finally
