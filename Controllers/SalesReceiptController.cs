@@ -178,18 +178,18 @@ namespace api.Controllers
 	public  string Post()
 	{
 		XmlDocument inputXMLDoc = new XmlDocument();
-		inputXMLDoc.AppendChild(inputXMLDoc.CreateXmlDeclaration("1.0", "utf-$ ", null));
-		inputXMLDoc.AppendChild(inputXMLDoc.CreateProcessingInstruction("qbxm$ ", "version=\"13.0\""));
+		inputXMLDoc.AppendChild(inputXMLDoc.CreateXmlDeclaration("1.0", "utf-8", null));
+		inputXMLDoc.AppendChild(inputXMLDoc.CreateProcessingInstruction("qbxml", "version=\"13.0\""));
 		XmlElement qbXML = inputXMLDoc.CreateElement("QBXML");
 		inputXMLDoc.AppendChild(qbXML);
 		XmlElement qbXMLMsgsRq = inputXMLDoc.CreateElement("QBXMLMsgsRq");
 		qbXML.AppendChild(qbXMLMsgsRq);
 		qbXMLMsgsRq.SetAttribute("onError", "stopOnError");
-		XmlElement salesRecModRq = inputXMLDoc.CreateElement("SalesReceiptModR q");
+		XmlElement salesRecModRq = inputXMLDoc.CreateElement("SalesReceiptModRq");
 		qbXMLMsgsRq.AppendChild(salesRecModRq);
 		XmlElement salesRecMod = inputXMLDoc.CreateElement("SalesReceiptMod");
 		salesRecModRq.AppendChild(salesRecMod);
-		salesRecMod.AppendChild(inputXMLDoc.CreateElement("TxnID")).InnerText= Request.Query["id"];
+		salesRecMod.AppendChild(inputXMLDoc.CreateElement("TxnID")).InnerText=Request.Query["id"];
 		salesRecMod.AppendChild(inputXMLDoc.CreateElement("EditSequence")).InnerText=Request.Query["eseq"];
 		salesRecMod.AppendChild(inputXMLDoc.CreateElement("TxnDate")).InnerText=Request.Query["date"];
 		string generatedXML = inputXMLDoc.OuterXml;
